@@ -45,13 +45,60 @@ RSpec.describe Philiprehberger::TaskRunner do
 
     it 'accepts a working directory' do
       result = described_class.run('pwd', chdir: '/')
-      expect(result.stdout.strip).to eq('/')
+      expect(result.stdout.strip).to match(%r{^/})
     end
 
     it 'raises TimeoutError when command exceeds timeout' do
       expect do
         described_class.run('sleep', '10', timeout: 0.1)
       end.to raise_error(Philiprehberger::TaskRunner::TimeoutError)
+    end
+
+    it 'captures multi-line stdout' do
+      result = described_class.run('ruby', '-e', '3.times { |i| puts i }')
+      lines = result.stdout.strip.split("\n")
+      expect(lines).to eq(%w[0 1 2])
+    end
+
+    it 'captures both stdout and stderr simultaneously' do
+      result = described_class.run('ruby', '-e', 'puts "out"; $stderr.puts "err"')
+      expect(result.stdout.strip).to eq('out')
+      expect(result.stderr.strip).to eq('err')
+    end
+
+    it 'returns empty stdout for commands with no output' do
+      result = described_class.run('true')
+      expect(result.stdout).to eq('')
+    end
+
+    it 'returns empty stderr for commands with no error output' do
+      result = described_class.run('echo', 'hello')
+      expect(result.stderr).to eq('')
+    end
+
+    it 'handles commands with special characters in arguments' do
+      result = described_class.run('echo', 'hello world')
+      expect(result.stdout.strip).to match(/hello world/)
+    end
+
+    it 'passes multiple env variables' do
+      result = described_class.run(
+        'ruby', '-e', 'puts ENV["A"]; puts ENV["B"]',
+        env: { 'A' => 'one', 'B' => 'two' }
+      )
+      lines = result.stdout.strip.split("\n")
+      expect(lines).to eq(%w[one two])
+    end
+
+    it 'handles a command with no args as a string' do
+      result = described_class.run('echo hello from shell')
+      expect(result.stdout.strip).to include('hello')
+    end
+
+    it 'returns exit code 1 for syntax errors' do
+      result = described_class.run('ruby', '-e', 'invalid syntax %%%')
+      expect(result.success?).to be false
+      expect(result.exit_code).not_to eq(0)
     end
 
     context 'with block (streaming)' do
@@ -77,6 +124,25 @@ RSpec.describe Philiprehberger::TaskRunner do
         result = described_class.run('true') { |_line| nil }
         expect(result.duration).to be >= 0
       end
+
+      it 'yields lines in order' do
+        lines = []
+        described_class.run('ruby', '-e', '5.times { |i| puts i }') { |line| lines << line.strip }
+        expect(lines).to eq(%w[0 1 2 3 4])
+      end
+
+      it 'handles streaming with no output' do
+        lines = []
+        result = described_class.run('true') { |line| lines << line }
+        expect(lines).to be_empty
+        expect(result.success?).to be true
+      end
+
+      it 'raises TimeoutError in streaming mode' do
+        expect do
+          described_class.run('sleep', '10', timeout: 0.1) { |_| nil }
+        end.to raise_error(Philiprehberger::TaskRunner::TimeoutError)
+      end
     end
   end
 
@@ -97,6 +163,31 @@ RSpec.describe Philiprehberger::TaskRunner do
     it 'reports failure for non-zero exit code' do
       result = described_class.new(stdout: '', stderr: '', exit_code: 1, duration: 0.0)
       expect(result.success?).to be false
+    end
+
+    it 'reports failure for exit code 2' do
+      result = described_class.new(stdout: '', stderr: '', exit_code: 2, duration: 0.0)
+      expect(result.success?).to be false
+    end
+
+    it 'reports failure for exit code 127' do
+      result = described_class.new(stdout: '', stderr: '', exit_code: 127, duration: 0.0)
+      expect(result.success?).to be false
+    end
+
+    it 'stores duration as a float' do
+      result = described_class.new(stdout: '', stderr: '', exit_code: 0, duration: 0.001)
+      expect(result.duration).to eq(0.001)
+    end
+  end
+
+  describe 'error classes' do
+    it 'TimeoutError inherits from Error' do
+      expect(Philiprehberger::TaskRunner::TimeoutError.ancestors).to include(Philiprehberger::TaskRunner::Error)
+    end
+
+    it 'Error inherits from StandardError' do
+      expect(Philiprehberger::TaskRunner::Error.ancestors).to include(StandardError)
     end
   end
 end
