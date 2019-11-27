@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-30
+
+### Added
+
+- Signal handling: `run(cmd, signal: :TERM, kill_after: 5)` sends the specified signal on timeout, escalates to SIGKILL after `kill_after` seconds
+- `Result#signal` reports which signal killed the process (`:TERM`, `:KILL`, or `nil`)
+- Input piping: `run(cmd, stdin: "data")` pipes string or IO data to the process's stdin
+- Stderr streaming: two-argument blocks receive `(line, stream)` where stream is `:stdout` or `:stderr`
+- Backward compatible: single-argument blocks still receive only stdout lines
+
 ## [0.1.4] - 2026-03-26
 
 ### Changed

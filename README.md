@@ -2,10 +2,14 @@
 
 [![Tests](https://github.com/philiprehberger/rb-task-runner/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rb-task-runner/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/philiprehberger-task_runner.svg)](https://rubygems.org/gems/philiprehberger-task_runner)
+[![GitHub release](https://img.shields.io/github/v/release/philiprehberger/rb-task-runner)](https://github.com/philiprehberger/rb-task-runner/releases)
+[![Last updated](https://img.shields.io/github/last-commit/philiprehberger/rb-task-runner)](https://github.com/philiprehberger/rb-task-runner/commits/main)
 [![License](https://img.shields.io/github/license/philiprehberger/rb-task-runner)](LICENSE)
+[![Bug Reports](https://img.shields.io/github/issues/philiprehberger/rb-task-runner/bug)](https://github.com/philiprehberger/rb-task-runner/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![Feature Requests](https://img.shields.io/github/issues/philiprehberger/rb-task-runner/enhancement)](https://github.com/philiprehberger/rb-task-runner/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
 [![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
-Shell command runner with output capture, timeout, and streaming
+Shell command runner with output capture, timeout, streaming, signal handling, and stdin piping
 
 ## Requirements
 
@@ -53,6 +57,29 @@ result = Philiprehberger::TaskRunner.run(
 )
 ```
 
+### Signal Handling
+
+```ruby
+result = Philiprehberger::TaskRunner.run(
+  'long-process',
+  timeout: 30,
+  signal: :TERM,
+  kill_after: 5
+)
+# On timeout: sends SIGTERM first, then SIGKILL after 5 seconds if still running
+# result.signal reports which signal killed the process (:TERM, :KILL, or nil)
+```
+
+### Input Piping
+
+```ruby
+result = Philiprehberger::TaskRunner.run('cat', stdin: "hello world")
+puts result.stdout  # => "hello world"
+
+# Also accepts IO objects
+result = Philiprehberger::TaskRunner.run('wc', '-l', stdin: File.open('data.txt'))
+```
+
 ### Streaming Output
 
 ```ruby
@@ -61,17 +88,30 @@ Philiprehberger::TaskRunner.run('tail', '-f', '/var/log/app.log', timeout: 10) d
 end
 ```
 
+### Stderr Streaming
+
+```ruby
+Philiprehberger::TaskRunner.run('make', 'build') do |line, stream|
+  case stream
+  when :stdout then puts "OUT: #{line}"
+  when :stderr then puts "ERR: #{line}"
+  end
+end
+```
+
 ## API
 
 | Method / Class | Description |
 |----------------|-------------|
-| `.run(cmd, *args, timeout:, env:, chdir:)` | Run a command and return a Result |
+| `.run(cmd, *args, timeout:, env:, chdir:, signal:, kill_after:, stdin:)` | Run a command and return a Result |
 | `.run(cmd) { \|line\| ... }` | Run with line-by-line stdout streaming |
+| `.run(cmd) { \|line, stream\| ... }` | Run with stdout and stderr streaming |
 | `Result#stdout` | Captured standard output |
 | `Result#stderr` | Captured standard error |
 | `Result#exit_code` | Process exit code |
 | `Result#success?` | Whether exit code is 0 |
 | `Result#duration` | Execution time in seconds |
+| `Result#signal` | Signal that killed the process (:TERM, :KILL, or nil) |
 
 ## Development
 
@@ -80,6 +120,13 @@ bundle install
 bundle exec rspec
 bundle exec rubocop
 ```
+
+## Support
+
+If you find this package useful, consider giving it a star on GitHub — it helps motivate continued maintenance and development.
+
+[![LinkedIn](https://img.shields.io/badge/Philip%20Rehberger-LinkedIn-0A66C2?logo=linkedin)](https://www.linkedin.com/in/philiprehberger)
+[![More packages](https://img.shields.io/badge/more-open%20source%20packages-blue)](https://philiprehberger.com/open-source-packages)
 
 ## License
 
