@@ -157,7 +157,7 @@ RSpec.describe Philiprehberger::TaskRunner do
       it 'pipes an IO object to stdin' do
         file = Tempfile.new('stdin_test')
         begin
-          file.write("file content here")
+          file.write('file content here')
           file.rewind
           result = described_class.run('cat', stdin: file)
           expect(result.stdout).to eq('file content here')
@@ -279,7 +279,7 @@ RSpec.describe Philiprehberger::TaskRunner do
       it 'handles multiple lines on both streams' do
         events = []
         described_class.run(
-          'ruby', '-e', '3.times { |i| puts "o#{i}"; $stderr.puts "e#{i}" }'
+          'ruby', '-e', '3.times { |i| puts "o#{i}"; $stderr.puts "e#{i}" }' # rubocop:disable Lint/InterpolationCheck
         ) { |line, stream| events << [line.strip, stream] }
         stdout_lines = events.select { |_, s| s == :stdout }.map(&:first)
         stderr_lines = events.select { |_, s| s == :stderr }.map(&:first)
