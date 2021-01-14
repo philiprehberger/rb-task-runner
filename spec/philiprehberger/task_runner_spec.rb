@@ -9,8 +9,8 @@ RSpec.describe Philiprehberger::TaskRunner do
       expect(Philiprehberger::TaskRunner::VERSION).not_to be_nil
     end
 
-    it 'is 0.2.0' do
-      expect(Philiprehberger::TaskRunner::VERSION).to eq('0.2.0')
+    it 'is 0.2.1' do
+      expect(Philiprehberger::TaskRunner::VERSION).to eq('0.2.1')
     end
   end
 
