@@ -38,6 +38,20 @@ module Philiprehberger
       def success?
         @exit_code.zero?
       end
+
+      # Hash representation of the result.
+      #
+      # @return [Hash]
+      def to_h
+        {
+          stdout: @stdout,
+          stderr: @stderr,
+          exit_code: @exit_code,
+          duration: @duration,
+          signal: @signal,
+          success: success?
+        }
+      end
     end
   end
 end

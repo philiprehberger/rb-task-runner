@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-09
+
+### Added
+- `TaskRunner.run!` raises `CommandError` on non-zero exit code (same API as `run`)
+- `CommandError#result` exposes the full `Result` object for inspection
+- `Result#to_h` for hash serialization of command results
+
 ## [0.2.1] - 2026-03-31
 
 ### Changed

@@ -36,6 +36,21 @@ puts result.success?     # => true
 puts result.duration     # => 0.012
 ```
 
+### Raising on Failure
+
+```ruby
+# Raises CommandError if the command exits non-zero
+result = Philiprehberger::TaskRunner.run!('make', 'build')
+
+# The error includes the full Result for inspection
+begin
+  Philiprehberger::TaskRunner.run!('false')
+rescue Philiprehberger::TaskRunner::CommandError => e
+  puts e.message          # => "command exited with code 1"
+  puts e.result.stderr    # => captured stderr
+end
+```
+
 ### Timeout
 
 ```ruby
@@ -99,6 +114,8 @@ end
 | Method / Class | Description |
 |----------------|-------------|
 | `.run(cmd, *args, timeout:, env:, chdir:, signal:, kill_after:, stdin:)` | Run a command and return a Result |
+| `.run!(cmd, *args, **opts)` | Same as `run`, raises `CommandError` on non-zero exit |
+| `CommandError#result` | The failed `Result` object |
 | `.run(cmd) { \|line\| ... }` | Run with line-by-line stdout streaming |
 | `.run(cmd) { \|line, stream\| ... }` | Run with stdout and stderr streaming |
 | `Result#stdout` | Captured standard output |
@@ -107,6 +124,7 @@ end
 | `Result#success?` | Whether exit code is 0 |
 | `Result#duration` | Execution time in seconds |
 | `Result#signal` | Signal that killed the process (:TERM, :KILL, or nil) |
+| `Result#to_h` | Hash representation of the result |
 
 ## Development
 
