@@ -122,9 +122,11 @@ end
 | `Result#stderr` | Captured standard error |
 | `Result#exit_code` | Process exit code |
 | `Result#success?` | Whether exit code is 0 |
+| `Result#failure?` | Logical inverse of `#success?` |
 | `Result#duration` | Execution time in seconds |
 | `Result#signal` | Signal that killed the process (:TERM, :KILL, or nil) |
-| `Result#to_h` | Hash representation of the result |
+| `Result#timed_out?` | Whether the process was killed for exceeding its timeout |
+| `Result#to_h` | Hash representation of the result (includes `:success` and `:timed_out`) |
 
 ## Development
 

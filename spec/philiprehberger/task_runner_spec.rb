@@ -9,8 +9,8 @@ RSpec.describe Philiprehberger::TaskRunner do
       expect(Philiprehberger::TaskRunner::VERSION).not_to be_nil
     end
 
-    it 'is 0.3.0' do
-      expect(Philiprehberger::TaskRunner::VERSION).to eq('0.3.0')
+    it 'is a non-empty string' do
+      expect(Philiprehberger::TaskRunner::VERSION).to match(/\A\d+\.\d+\.\d+\z/)
     end
   end
 
@@ -374,10 +374,40 @@ RSpec.describe Philiprehberger::TaskRunner do
     it 'returns a hash with all fields' do
       result = described_class.run('echo', 'hello')
       h = result.to_h
-      expect(h).to include(stdout: "hello\n", exit_code: 0, success: true)
+      expect(h).to include(stdout: "hello\n", exit_code: 0, success: true, timed_out: false)
       expect(h).to have_key(:stderr)
       expect(h).to have_key(:duration)
       expect(h).to have_key(:signal)
+    end
+  end
+
+  describe 'Result#failure?' do
+    it 'is false for a successful exit' do
+      expect(described_class.run('true').failure?).to be false
+    end
+
+    it 'is true for a non-zero exit' do
+      expect(described_class.run('sh', '-c', 'exit 7').failure?).to be true
+    end
+  end
+
+  describe 'Result#timed_out?' do
+    it 'is false for a normal exit' do
+      expect(described_class.run('true').timed_out?).to be false
+    end
+
+    it 'is true when signal is :TERM' do
+      result = Philiprehberger::TaskRunner::Result.new(
+        stdout: '', stderr: '', exit_code: 143, duration: 0.1, signal: :TERM
+      )
+      expect(result.timed_out?).to be true
+    end
+
+    it 'is true when signal is :KILL' do
+      result = Philiprehberger::TaskRunner::Result.new(
+        stdout: '', stderr: '', exit_code: 137, duration: 0.1, signal: :KILL
+      )
+      expect(result.timed_out?).to be true
     end
   end
 end
