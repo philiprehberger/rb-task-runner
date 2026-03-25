@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/philiprehberger-task_runner.svg)](https://rubygems.org/gems/philiprehberger-task_runner)
 [![License](https://img.shields.io/github/license/philiprehberger/rb-task-runner)](LICENSE)
 
-Shell command runner with output capture, timeout, and streaming.
+Shell command runner with output capture, timeout, and streaming
 
 ## Requirements
 
