@@ -31,7 +31,7 @@ module Philiprehberger
       #
       # @return [Boolean]
       def success?
-        @exit_code == 0
+        @exit_code.zero?
       end
     end
   end
