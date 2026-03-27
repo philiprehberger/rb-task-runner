@@ -3,6 +3,7 @@
 [![Tests](https://github.com/philiprehberger/rb-task-runner/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rb-task-runner/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/philiprehberger-task_runner.svg)](https://rubygems.org/gems/philiprehberger-task_runner)
 [![License](https://img.shields.io/github/license/philiprehberger/rb-task-runner)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Shell command runner with output capture, timeout, and streaming
 
@@ -82,4 +83,4 @@ bundle exec rubocop
 
 ## License
 
-MIT
+[MIT](LICENSE)
