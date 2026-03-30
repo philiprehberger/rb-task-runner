@@ -8,9 +8,10 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Philip Rehberger']
   spec.email         = ['me@philiprehberger.com']
 
-  spec.summary       = 'Shell command runner with output capture, timeout, and streaming'
+  spec.summary       = 'Shell command runner with output capture, timeout, streaming, signal handling, and stdin piping'
   spec.description   = 'Run shell commands with captured stdout/stderr, exit code, duration measurement, ' \
-                       'configurable timeout, environment variables, and line-by-line streaming via blocks.'
+                       'configurable timeout, environment variables, line-by-line streaming, ' \
+                       'graceful signal escalation on timeout, and stdin piping.'
   spec.homepage      = 'https://github.com/philiprehberger/rb-task-runner'
   spec.license       = 'MIT'
 
