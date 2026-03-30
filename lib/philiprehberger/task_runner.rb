@@ -64,7 +64,7 @@ module Philiprehberger
             stdout_buf << drain_io(stdout_io)
             stderr_buf << drain_io(stderr_io)
             wait_thr.value
-            duration = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
+            Process.clock_gettime(Process::CLOCK_MONOTONIC)
             raise TimeoutError, 'command timed out'
           end
         else
@@ -192,7 +192,7 @@ module Philiprehberger
     # @api private
     def self.drain_io(io)
       io.read_nonblock(1_048_576)
-    rescue EOFError, IO::WaitReadable, IOError
+    rescue IO::WaitReadable, IOError
       ''
     end
 
