@@ -9,8 +9,8 @@ RSpec.describe Philiprehberger::TaskRunner do
       expect(Philiprehberger::TaskRunner::VERSION).not_to be_nil
     end
 
-    it 'is 0.2.1' do
-      expect(Philiprehberger::TaskRunner::VERSION).to eq('0.2.1')
+    it 'is 0.3.0' do
+      expect(Philiprehberger::TaskRunner::VERSION).to eq('0.3.0')
     end
   end
 
@@ -342,6 +342,42 @@ RSpec.describe Philiprehberger::TaskRunner do
 
     it 'Error inherits from StandardError' do
       expect(Philiprehberger::TaskRunner::Error.ancestors).to include(StandardError)
+    end
+
+    it 'CommandError inherits from Error' do
+      expect(Philiprehberger::TaskRunner::CommandError.ancestors).to include(Philiprehberger::TaskRunner::Error)
+    end
+  end
+
+  describe '.run!' do
+    it 'returns Result on success' do
+      result = described_class.run!('echo', 'ok')
+      expect(result).to be_a(Philiprehberger::TaskRunner::Result)
+      expect(result.success?).to be true
+    end
+
+    it 'raises CommandError on non-zero exit' do
+      expect { described_class.run!('false') }
+        .to raise_error(Philiprehberger::TaskRunner::CommandError) do |e|
+          expect(e.result.exit_code).to eq(1)
+          expect(e.message).to include('code 1')
+        end
+    end
+
+    it 'passes options through to run' do
+      result = described_class.run!('pwd', chdir: '/tmp')
+      expect(result.stdout.strip).to eq('/tmp')
+    end
+  end
+
+  describe 'Result#to_h' do
+    it 'returns a hash with all fields' do
+      result = described_class.run('echo', 'hello')
+      h = result.to_h
+      expect(h).to include(stdout: "hello\n", exit_code: 0, success: true)
+      expect(h).to have_key(:stderr)
+      expect(h).to have_key(:duration)
+      expect(h).to have_key(:signal)
     end
   end
 end

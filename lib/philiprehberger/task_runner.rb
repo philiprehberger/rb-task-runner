@@ -11,6 +11,17 @@ module Philiprehberger
     class Error < StandardError; end
     class TimeoutError < Error; end
 
+    # Raised by run! when the command exits with a non-zero status.
+    class CommandError < Error
+      # @return [Result] the failed command result
+      attr_reader :result
+
+      def initialize(result)
+        @result = result
+        super("command exited with code #{result.exit_code}")
+      end
+    end
+
     # Run a shell command with output capture, optional timeout, streaming, signal handling, and stdin piping.
     #
     # When a block is given, each line of stdout/stderr is yielded as it arrives.
@@ -43,6 +54,20 @@ module Philiprehberger
       else
         run_capture(env_hash, full_cmd, spawn_opts, timeout, start_time, signal, kill_after, stdin)
       end
+    end
+
+    # Run a shell command, raising CommandError on non-zero exit.
+    #
+    # Accepts the same arguments as {.run}.
+    #
+    # @return [Result] the command result
+    # @raise [CommandError] if the command exits with a non-zero status
+    # @raise [TimeoutError] if the command exceeds the timeout
+    def self.run!(cmd, ...)
+      result = run(cmd, ...)
+      raise CommandError, result unless result.success?
+
+      result
     end
 
     # @api private
