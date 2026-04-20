@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-20
+
+### Added
+- `Result#failure?` — logical inverse of `#success?` for clearer branching
+- `Result#timed_out?` — true when the process was killed by the task runner for exceeding its timeout (`:TERM` or `:KILL` signal)
+- `:timed_out` key added to `Result#to_h` alongside the existing `:success` flag
+
 ## [0.3.0] - 2026-04-09
 
 ### Added
