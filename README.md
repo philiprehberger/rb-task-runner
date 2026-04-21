@@ -51,6 +51,15 @@ rescue Philiprehberger::TaskRunner::CommandError => e
 end
 ```
 
+### Boolean Success Check
+
+```ruby
+# Returns true for exit 0, false otherwise (timeouts also return false)
+if Philiprehberger::TaskRunner.run?('which', 'git')
+  puts 'git is installed'
+end
+```
+
 ### Timeout
 
 ```ruby
@@ -115,6 +124,7 @@ end
 |----------------|-------------|
 | `.run(cmd, *args, timeout:, env:, chdir:, signal:, kill_after:, stdin:)` | Run a command and return a Result |
 | `.run!(cmd, *args, **opts)` | Same as `run`, raises `CommandError` on non-zero exit |
+| `.run?(cmd, *args, **opts)` | Boolean shortcut — true only when exit code is 0; timeouts return false |
 | `CommandError#result` | The failed `Result` object |
 | `.run(cmd) { \|line\| ... }` | Run with line-by-line stdout streaming |
 | `.run(cmd) { \|line, stream\| ... }` | Run with stdout and stderr streaming |

@@ -70,6 +70,17 @@ module Philiprehberger
       result
     end
 
+    # Boolean convenience — run the command and return whether it succeeded
+    # (exit code 0). Swallows `TimeoutError` (reported as false). Accepts the
+    # same arguments as {.run}.
+    #
+    # @return [Boolean] true if the command exited with status 0
+    def self.run?(cmd, ...)
+      run(cmd, ...).success?
+    rescue TimeoutError
+      false
+    end
+
     # @api private
     def self.run_capture(env_hash, full_cmd, spawn_opts, timeout, start_time, signal, kill_after, stdin_data)
       stdout_buf = +''

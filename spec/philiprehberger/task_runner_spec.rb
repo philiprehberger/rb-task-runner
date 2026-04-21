@@ -410,4 +410,22 @@ RSpec.describe Philiprehberger::TaskRunner do
       expect(result.timed_out?).to be true
     end
   end
+
+  describe '.run?' do
+    it 'returns true when the command exits 0' do
+      expect(described_class.run?('true')).to be true
+    end
+
+    it 'returns false when the command exits non-zero' do
+      expect(described_class.run?('false')).to be false
+    end
+
+    it 'returns false when the command times out' do
+      expect(described_class.run?('sleep', '10', timeout: 0.1)).to be false
+    end
+
+    it 'passes keyword arguments through to .run' do
+      expect(described_class.run?('sh', '-c', 'echo $FOO', env: { 'FOO' => 'bar' })).to be true
+    end
+  end
 end
