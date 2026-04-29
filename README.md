@@ -60,6 +60,22 @@ if Philiprehberger::TaskRunner.run?('which', 'git')
 end
 ```
 
+### Which
+
+Locate an executable on `PATH` (like the `which` shell builtin). Returns the
+absolute path or `nil` when not found:
+
+```ruby
+Philiprehberger::TaskRunner.which("git")
+# => "/usr/bin/git"
+
+Philiprehberger::TaskRunner.which("definitely-not-installed")
+# => nil
+```
+
+On Windows, candidate suffixes from `ENV["PATHEXT"]` (`.COM`, `.EXE`,
+`.BAT`, `.CMD`) are tried automatically.
+
 ### Timeout
 
 ```ruby
@@ -125,6 +141,7 @@ end
 | `.run(cmd, *args, timeout:, env:, chdir:, signal:, kill_after:, stdin:)` | Run a command and return a Result |
 | `.run!(cmd, *args, **opts)` | Same as `run`, raises `CommandError` on non-zero exit |
 | `.run?(cmd, *args, **opts)` | Boolean shortcut — true only when exit code is 0; timeouts return false |
+| `.which(cmd)` | Absolute path of `cmd` on PATH (or `nil`); honors `PATHEXT` on Windows |
 | `CommandError#result` | The failed `Result` object |
 | `.run(cmd) { \|line\| ... }` | Run with line-by-line stdout streaming |
 | `.run(cmd) { \|line, stream\| ... }` | Run with stdout and stderr streaming |

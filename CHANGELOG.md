@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-04-28
+
+### Added
+- `TaskRunner.which(cmd)` — absolute path of an executable on `PATH`, or `nil` when not found. Honors `ENV['PATHEXT']` on Windows. Raises `ArgumentError` for nil/empty input.
+
 ## [0.5.0] - 2026-04-21
 
 ### Added

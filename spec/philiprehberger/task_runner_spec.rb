@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'tempfile'
+require 'tmpdir'
 
 RSpec.describe Philiprehberger::TaskRunner do
   describe 'VERSION' do
@@ -426,6 +427,52 @@ RSpec.describe Philiprehberger::TaskRunner do
 
     it 'passes keyword arguments through to .run' do
       expect(described_class.run?('sh', '-c', 'echo $FOO', env: { 'FOO' => 'bar' })).to be true
+    end
+  end
+
+  describe '.which' do
+    it 'returns the absolute path for a known binary' do
+      path = described_class.which('ruby')
+      expect(path).to be_a(String)
+      expect(File.executable?(path)).to be true
+    end
+
+    it 'returns nil for an unknown binary' do
+      expect(described_class.which('definitely-not-a-real-binary-xyz')).to be_nil
+    end
+
+    it 'finds an executable installed in a tmp dir on PATH' do
+      Dir.mktmpdir do |dir|
+        bin_path = File.join(dir, 'mytool')
+        File.write(bin_path, "#!/bin/sh\necho ok\n")
+        File.chmod(0o755, bin_path)
+
+        original_path = ENV.fetch('PATH', '')
+        ENV['PATH'] = "#{dir}#{File::PATH_SEPARATOR}#{original_path}"
+        begin
+          expect(described_class.which('mytool')).to eq(File.expand_path(bin_path))
+        ensure
+          ENV['PATH'] = original_path
+        end
+      end
+    end
+
+    it 'returns nil for a binary outside PATH' do
+      Dir.mktmpdir do |dir|
+        bin_path = File.join(dir, 'hidden-tool')
+        File.write(bin_path, "#!/bin/sh\necho ok\n")
+        File.chmod(0o755, bin_path)
+        # Do NOT add `dir` to PATH.
+        expect(described_class.which('hidden-tool')).to be_nil
+      end
+    end
+
+    it 'raises ArgumentError for nil' do
+      expect { described_class.which(nil) }.to raise_error(ArgumentError)
+    end
+
+    it 'raises ArgumentError for an empty string' do
+      expect { described_class.which('') }.to raise_error(ArgumentError)
     end
   end
 end

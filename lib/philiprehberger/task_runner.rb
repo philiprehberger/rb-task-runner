@@ -81,6 +81,37 @@ module Philiprehberger
       false
     end
 
+    # Find the absolute path of an executable on PATH.
+    #
+    # Behaves like the `which` shell builtin: walks each entry in
+    # `ENV['PATH']` and returns the first directory that contains an
+    # executable file matching `cmd`. On Windows, also tries each suffix in
+    # `ENV['PATHEXT']`. Returns `nil` when nothing is found.
+    #
+    # @param cmd [String] the executable name to search for
+    # @return [String, nil] the absolute path, or nil when not found
+    # @raise [ArgumentError] if `cmd` is nil or empty
+    def self.which(cmd)
+      raise ArgumentError, 'cmd cannot be nil or empty' if cmd.nil? || cmd.to_s.empty?
+
+      exts = if Gem.win_platform?
+               (ENV['PATHEXT'] || '.COM;.EXE;.BAT;.CMD').split(';')
+             else
+               ['']
+             end
+
+      ENV.fetch('PATH', '').split(File::PATH_SEPARATOR).each do |dir|
+        next if dir.empty?
+
+        exts.each do |ext|
+          candidate = File.join(dir, "#{cmd}#{ext}")
+          return File.expand_path(candidate) if File.file?(candidate) && File.executable?(candidate)
+        end
+      end
+
+      nil
+    end
+
     # @api private
     def self.run_capture(env_hash, full_cmd, spawn_opts, timeout, start_time, signal, kill_after, stdin_data)
       stdout_buf = +''
